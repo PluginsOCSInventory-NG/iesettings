@@ -1,7 +1,7 @@
 <?php
-function plugin_version_runningProcess()
+function plugin_version_iesettings()
 {
-return array('name' => 'Running process',
+return array('name' => 'Internet Explorer settings',
 'version' => '1.0',
 'author'=> 'Community, Frank BOURDEAU',
 'license' => 'GPLv2',
