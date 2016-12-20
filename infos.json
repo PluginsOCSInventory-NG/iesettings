@@ -1,0 +1,10 @@
+{
+  "displayName" : "Internet Explorer settings",
+  "author" : ["Frank BOURDEAU"],
+  "contributor" : [],
+  "supportedAgent" : ["Windows"],
+  "description" : {
+    "fr" : "Recupere la configuration du proxy dans IE",
+    "en" : "Retrieve internet explorer proxy settings"
+  }
+}
