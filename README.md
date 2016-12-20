@@ -1,2 +1,2 @@
-# iesettings
-Retrieve Internet Explorer settings
+# Internet Explorer proxy settings
+Retrieve IE proxy settings
