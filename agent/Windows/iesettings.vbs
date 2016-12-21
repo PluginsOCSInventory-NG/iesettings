@@ -1,7 +1,7 @@
 ' This script was written to gather information about the running processes for OCS Invetory NG.
 ' Note, that the process memory is being reported based on the Working Set Size across all operating systems.
 ' This is the figure that win2k and xp is reporting in their task managers. Vista, 7 and 2008 are
-' by default showing the Private Working Set values in their task managers which is slightly diferent,
+' by default showing the Private Working Set values in their task managers which is slightly different,
 ' and is not suppoprted by win2k and xp.
 
 'start with detecting the operating system in use
@@ -50,16 +50,16 @@ end if
 err.clear
 autoconfurl = c.RegRead("HKEY_USERS\"& SID &"\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\AutoConfigURL")
 if err.number = 0 then
-Wscript.Echo "<AUTOCONFIGURL>" & autoconfurl & "</AUTOCONFIGURL>"
+    Wscript.Echo "<AUTOCONFIGURL>" & autoconfurl & "</AUTOCONFIGURL>"
 else
-Wscript.Echo "<AUTOCONFIGURL> READ ERROR </AUTOCONFIGURL>"
+    Wscript.Echo "<AUTOCONFIGURL> READ ERROR </AUTOCONFIGURL>"
 end if
 err.clear
 proxyserv = c.RegRead("HKEY_USERS\"& SID &"\software\Microsoft\Windows\CurrentVersion\Internet Settings\ProxyServer")
 if err.number = 0 then
-Wscript.Echo "<PROXYSERVER>" & proxyserv & "</PROXYSERVER>"
+    Wscript.Echo "<PROXYSERVER>" & proxyserv & "</PROXYSERVER>"
 else
-Wscript.Echo "<PROXYSERVER> READ ERROR </PROXYSERVER>"
+    Wscript.Echo "<PROXYSERVER> READ ERROR </PROXYSERVER>"
 end if
 err.clear
 Wscript.Echo "</IESETTINGS>"
