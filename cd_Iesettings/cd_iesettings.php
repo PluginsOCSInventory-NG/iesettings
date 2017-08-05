@@ -34,7 +34,8 @@ $list_fields = array(
     'SID' => 'SID',
     'PROXYENABLE' => 'PROXYENABLE',
     'AUTOCONFIGURL' => 'AUTOCONFIGURL',
-    'PROXYSERVER' => 'PROXYSERVER'
+    'PROXYSERVER' => 'PROXYSERVER',
+    'PROXYOVERRIDE' => 'PROXYOVERRIDE'
 );
 $list_col_cant_del=$list_fields;
 $default_fields= $list_fields;
