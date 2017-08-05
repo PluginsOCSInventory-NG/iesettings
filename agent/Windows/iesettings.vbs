@@ -1,65 +1,67 @@
-' This script was written to gather information about the running processes for OCS Invetory NG.
-' Note, that the process memory is being reported based on the Working Set Size across all operating systems.
-' This is the figure that win2k and xp is reporting in their task managers. Vista, 7 and 2008 are
-' by default showing the Private Working Set values in their task managers which is slightly different,
-' and is not suppoprted by win2k and xp.
+'----------------------------------------------------------
+' Plugin for OCS Inventory NG 2.x
+' Script : Retrieve Internet Explorer settings
+' Version : 2.0
+' Date : 05/08/2017
+' Authors : Guillaume PRIOU and Stéphane PAUTREL
+'----------------------------------------------------------
+On error resume next
 
-'start with detecting the operating system in use
-strComputer = "."
-Set objWMIService = GetObject("winmgmts:" & "{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
+Dim ColItems, ObjItem, Sid, strComputer, objWMIService, asplit, Result
+
+Set objWMIService = GetObject("winmgmts:\\.\root\CIMV2")
+Set WShell = CreateObject("WScript.Shell")
+
 Set colOperatingSystems = objWMIService.ExecQuery ("Select * from Win32_OperatingSystem")
 
 For Each objOperatingSystem in colOperatingSystems
-    If InStr(objOperatingSystem.version,"5.0.")<>0 Then  'os is windows 2000
-        CompPropNum=16
-        DescrPropNum=17
-    End If
-    If InStr(objOperatingSystem.version,"5.1.")<>0 Or InStr(objOperatingSystem.version,"5.2.")<>0 Then 'os is windows XP or 2003
-        CompPropNum=35
-        DescrPropNum=36
-    End If
-    If InStr(objOperatingSystem.version,"6.0.")<>0 Or InStr(objOperatingSystem.version,"6.1.")<>0 Then 'os is windows Vista or 2008 or Windows 7 or 2008 r2
-        CompPropNum=33
-        DescrPropNum=34
-    End If
+	If InStr(objOperatingSystem.version,"5.1.")<>0 Or InStr(objOperatingSystem.version,"5.2.")<>0 Then 'OS is windows XP or 2003
+		LastSession = WShell.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AltDefaultUserName")
+	Else
+		LastSession = WShell.RegRead("HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\LastLoggedOnUser")
+		asplit = split(LastSession, "\")
+		LastSession = asplit(1)
+	End If
 Next
 
-If CompPropNum=0 Then wscript.quit 2              'operating system not supported, exiting with code 2
-
-Wscript.Echo "<IESETTINGS>"
-set c=CreateObject("WScript.Shell" )
-DerniereSession = c.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AltDefaultUserName")
-Wscript.Echo "<LASTSESSION>"& DerniereSession &"</LASTSESSION>"
-Set WshNetwork = WScript.CreateObject("WScript.Network")
-user = WshNetwork.UserName
-
-Dim ColItems, ObjItem, Sid, strComputer, Wmi
-strComputer = "."
-Set Wmi = GetObject("winmgmts:\\" & strComputer & "\root\CIMV2")
-Set ColItems = Wmi.ExecQuery("SELECT * FROM Win32_UserAccount where name='"& DerniereSession &"'",,48)
+Set ColItems = objWMIService.ExecQuery("SELECT * FROM Win32_UserAccount where name='" & LastSession & "'",,48)
 For Each ObjItem in ColItems
-    SID = objItem.SID
+	strRegistry = "HKEY_USERS\" & objItem.SID & "\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\"
+	Proxyenable = WShell.RegRead(strRegistry & "ProxyEnable")
+
+	If err.number = 0 Then
+		Result = "<IESETTINGS>" & VbCrLf
+		Result = Result & "<LASTSESSION>" & LastSession & "</LASTSESSION>" & VbCrLf
+		Result = Result & "<SID>" & objItem.SID & "</SID>" & VbCrLf
+		Result = Result & "<PROXYENABLE>" & Proxyenable & "</PROXYENABLE>" & VbCrLf
+		Err.Clear
+		
+		AutoConfURL = WShell.RegRead(strRegistry & "AutoConfigURL")
+		If err.number = 0 Then
+			Result = Result & "<AUTOCONFIGURL>" & AutoConfURL & "</AUTOCONFIGURL>" & VbCrLf
+		Else
+			Result = Result & "<AUTOCONFIGURL>No script</AUTOCONFIGURL>" & VbCrLf
+		End If
+		Err.Clear
+		
+		ProxyServ = WShell.RegRead(strRegistry & "ProxyServer")
+		If err.number = 0 Then
+			Result = Result & "<PROXYSERVER>" & ProxyServ & "</PROXYSERVER>" & VbCrLf
+		Else
+			Result = Result & "<PROXYSERVER>No proxy</PROXYSERVER>" & VbCrLf
+		End If
+		Err.Clear
+		
+		ProxyOver = WShell.RegRead(strRegistry & "ProxyOverride")
+		ProxyOver = replace(ProxyOver,"<local>","")
+		If err.number = 0 Then
+			Result = Result & "<PROXYOVERRIDE>" & ProxyOver & "</PROXYOVERRIDE>" & VbCrLf
+		Else
+			Result = Result & "<PROXYOVERRIDE>No proxy override</PROXYOVERRIDE>" & VbCrLf
+		End If
+
+		Result = Result & "</IESETTINGS>" & VbCrLf
+		Wscript.echo Result
+	End If
 Next
-Wscript.Echo "<SID>"& SID &"</SID>"
-proxyenable = c.RegRead("HKEY_USERS\"& SID &"\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\ProxyEnable")
-If err.number = 0 then
-    Wscript.Echo "<PROXYENABLE>" & proxyenable & "</PROXYENABLE>"
-else
-    Wscript.Echo "<PROXYENABLE> READ ERROR </PROXYENABLE>"
-end if
-err.clear
-autoconfurl = c.RegRead("HKEY_USERS\"& SID &"\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\AutoConfigURL")
-if err.number = 0 then
-    Wscript.Echo "<AUTOCONFIGURL>" & autoconfurl & "</AUTOCONFIGURL>"
-else
-    Wscript.Echo "<AUTOCONFIGURL> READ ERROR </AUTOCONFIGURL>"
-end if
-err.clear
-proxyserv = c.RegRead("HKEY_USERS\"& SID &"\software\Microsoft\Windows\CurrentVersion\Internet Settings\ProxyServer")
-if err.number = 0 then
-    Wscript.Echo "<PROXYSERVER>" & proxyserv & "</PROXYSERVER>"
-else
-    Wscript.Echo "<PROXYSERVER> READ ERROR </PROXYSERVER>"
-end if
-err.clear
-Wscript.Echo "</IESETTINGS>"
+Err.Clear
