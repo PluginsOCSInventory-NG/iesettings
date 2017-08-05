@@ -19,7 +19,8 @@ $DATA_MAP{iesettings} = {
                 SID => {},
                 PROXYENABLE => {},
                 AUTOCONFIGURL => {},
-                PROXYSERVER => {}
+                PROXYSERVER => {},
+                PROXYOVERRIDE => {}
 	}
 };
 
