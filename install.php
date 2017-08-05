@@ -2,7 +2,7 @@
 function plugin_version_iesettings()
 {
 return array('name' => 'Internet Explorer settings',
-'version' => '1.0',
+'version' => '1.1',
 'author'=> 'Community, Frank BOURDEAU',
 'license' => 'GPLv2',
 'verMinOcs' => '2.2');
@@ -21,6 +21,7 @@ $object->sql_query("CREATE TABLE IF NOT EXISTS `iesttings` (
                       `PROXYENABLE` INTEGER DEFAULT NULL,
                       `AUTOCONFIGURL` VARCHAR(255) DEFAULT NULL,
                       `PROXYSERVER` VARCHAR(15) DEFAULT NULL,
+                      `PROXYOVERRIDE` VARCHAR(255) DEFAULT NULL,
                       PRIMARY KEY  (`ID`,`HARDWARE_ID`)
                       ) ENGINE=INNODB;");
 
