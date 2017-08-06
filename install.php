@@ -13,7 +13,7 @@ function plugin_init_iesettings()
 $object = new plugins;
 $object -> add_cd_entry("iesettings","other");
 
-$object -> sql_query("CREATE TABLE IF NOT EXISTS `iesttings` (
+$object -> sql_query("CREATE TABLE IF NOT EXISTS `iesettings` (
   `ID` INT(11) NOT NULL AUTO_INCREMENT,
   `HARDWARE_ID` INT(11) NOT NULL,
   `LASTSESSION` VARCHAR(255) DEFAULT NULL,
