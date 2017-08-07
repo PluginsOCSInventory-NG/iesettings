@@ -21,6 +21,7 @@ $DATA_MAP{iesettings} = {
 	writeDiff => 0,
 	cache => 0,
 	fields => {
+                VERSION => {},
                 LASTSESSION => {},
                 SID => {},
                 PROXYENABLE => {},
