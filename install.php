@@ -19,9 +19,9 @@ $object -> sql_query("CREATE TABLE IF NOT EXISTS `iesettings` (
   `VERSION` VARCHAR(255) DEFAULT NULL,
   `LASTSESSION` VARCHAR(255) DEFAULT NULL,
   `SID` VARCHAR(255) DEFAULT NULL,
-  `PROXYENABLE` INTEGER DEFAULT NULL,
+  `PROXYENABLE` VARCHAR(255) DEFAULT NULL,
   `AUTOCONFIGURL` VARCHAR(255) DEFAULT NULL,
-  `PROXYSERVER` VARCHAR(15) DEFAULT NULL,
+  `PROXYSERVER` VARCHAR(255) DEFAULT NULL,
   `PROXYOVERRIDE` VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY  (`ID`,`HARDWARE_ID`)
 ) ENGINE=INNODB;");
@@ -31,8 +31,8 @@ $object -> sql_query("CREATE TABLE IF NOT EXISTS `iesettings` (
 function plugin_delete_iesettings()
 {
 $object = new plugins;
-$object->del_cd_entry("iesettings");
-$object->sql_query("DROP TABLE `iesettings`");
+$object -> del_cd_entry("iesettings");
+$object -> sql_query("DROP TABLE `iesettings`;");
 
 }
 
