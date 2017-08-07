@@ -31,6 +31,7 @@ else{
 	$tab_options['table_name']=$table_name;
 	echo open_form($form_name);
 	$list_fields = array(
+		'Version' => 'VERSION',
 		'Last session' => 'LASTSESSION',
 		'SID' => 'SID',
 		'Proxy enable' => 'PROXYENABLE',
