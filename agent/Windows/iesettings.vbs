@@ -7,17 +7,20 @@
 '----------------------------------------------------------
 On error resume next
 
-Dim ColItems, ObjItem, Sid, strComputer, objWMIService, asplit, Result
+Dim objWMIService, WShell, colOperatingSystems, objOperatingSystem
+Dim IEVersion, LastSession, asplit, ColItems, ObjItem, strRegistry
+Dim Proxyenable, Result, AutoConfURL, ProxyServ, ProxyOver
 
 Set objWMIService = GetObject("winmgmts:\\.\root\CIMV2")
 Set WShell = CreateObject("WScript.Shell")
-
 Set colOperatingSystems = objWMIService.ExecQuery ("Select * from Win32_OperatingSystem")
 
 For Each objOperatingSystem in colOperatingSystems
 	If InStr(objOperatingSystem.version,"5.1.")<>0 Or InStr(objOperatingSystem.version,"5.2.")<>0 Then 'OS is windows XP or 2003
+		IEVersion = WShell.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\Version")
 		LastSession = WShell.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AltDefaultUserName")
 	Else
+		IEVersion = WShell.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\svcVersion")
 		LastSession = WShell.RegRead("HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\LastLoggedOnUser")
 		asplit = split(LastSession, "\")
 		LastSession = asplit(1)
@@ -31,6 +34,7 @@ For Each ObjItem in ColItems
 
 	If err.number = 0 Then
 		Result = "<IESETTINGS>" & VbCrLf
+		Result = Result & "<VERSION>" & IEVersion & "</VERSION>" & VbCrLf
 		Result = Result & "<LASTSESSION>" & LastSession & "</LASTSESSION>" & VbCrLf
 		Result = Result & "<SID>" & objItem.SID & "</SID>" & VbCrLf
 		Result = Result & "<PROXYENABLE>" & Proxyenable & "</PROXYENABLE>" & VbCrLf
