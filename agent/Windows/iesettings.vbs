@@ -1,10 +1,18 @@
 '----------------------------------------------------------
 ' Plugin for OCS Inventory NG 2.x
-' Script : Retrieve Internet Explorer settings
-' Version : 2.0
-' Date : 05/08/2017
-' Authors : Guillaume PRIOU and Stéphane PAUTREL
+' Script :		Retrieve Internet Explorer settings
+' Version :		2.00
+' Date :		05/08/2017
+' Authors :		Guillaume PRIOU and Stéphane PAUTREL (acb78.com)
 '----------------------------------------------------------
+' OS checked [X] on	32b	64b	(Professionnal edition)
+'	Windows XP		[X]	[ ]
+'	Windows 7		[N]	[N]
+'	Windows 8.1		[N]	[N]	
+'	Windows 10		[N]	[N]
+' ---------------------------------------------------------
+' NOTE : No checked on Windows Vista and Windows 8
+' ---------------------------------------------------------
 On error resume next
 
 Dim objWMIService, WShell, colOperatingSystems, objOperatingSystem
@@ -44,7 +52,7 @@ For Each ObjItem in ColItems
 		If err.number = 0 Then
 			Result = Result & "<AUTOCONFIGURL>" & AutoConfURL & "</AUTOCONFIGURL>" & VbCrLf
 		Else
-			Result = Result & "<AUTOCONFIGURL>No script</AUTOCONFIGURL>" & VbCrLf
+			Result = Result & "<AUTOCONFIGURL>Pas de script auto</AUTOCONFIGURL>" & VbCrLf
 		End If
 		Err.Clear
 		
@@ -52,7 +60,7 @@ For Each ObjItem in ColItems
 		If err.number = 0 Then
 			Result = Result & "<PROXYSERVER>" & ProxyServ & "</PROXYSERVER>" & VbCrLf
 		Else
-			Result = Result & "<PROXYSERVER>No proxy</PROXYSERVER>" & VbCrLf
+			Result = Result & "<PROXYSERVER>Pas de proxy</PROXYSERVER>" & VbCrLf
 		End If
 		Err.Clear
 		
@@ -61,7 +69,7 @@ For Each ObjItem in ColItems
 		If err.number = 0 Then
 			Result = Result & "<PROXYOVERRIDE>" & ProxyOver & "</PROXYOVERRIDE>" & VbCrLf
 		Else
-			Result = Result & "<PROXYOVERRIDE>No proxy override</PROXYOVERRIDE>" & VbCrLf
+			Result = Result & "<PROXYOVERRIDE>Pas de param local</PROXYOVERRIDE>" & VbCrLf
 		End If
 
 		Result = Result & "</IESETTINGS>" & VbCrLf
