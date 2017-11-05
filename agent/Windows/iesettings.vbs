@@ -1,43 +1,46 @@
 '----------------------------------------------------------
 ' Plugin for OCS Inventory NG 2.x
 ' Script :		Retrieve Internet Explorer settings
-' Version :		2.00
-' Date :		05/08/2017
+' Version :		2.01
+' Date :		05/11/2017
 ' Authors :		Guillaume PRIOU and Stéphane PAUTREL (acb78.com)
 '----------------------------------------------------------
 ' OS checked [X] on	32b	64b	(Professionnal edition)
-'	Windows XP	[X]
-'	Windows Vista	[N]	[N]
-'	Windows 7	[N]	[N]
-'	Windows 8.1	[N]	[N]	
-'	Windows 10	[N]	[N]
-'	Windows 2k8R2		[N]
-'	Windows 2k12R2		[N]
-'	Windows 2k16		[N]
+'	Windows XP		[ ]
+'	Windows Vista	[X]	[X]
+'	Windows 7		[X]	[X]
+'	Windows 8.1		[X]	[X]	
+'	Windows 10		[X]	[X]
 ' ---------------------------------------------------------
 ' NOTE : No checked on Windows 8
 ' ---------------------------------------------------------
-On error resume next
+On Error Resume Next
 
-Dim objWMIService, WShell, colOperatingSystems, objOperatingSystem
-Dim IEVersion, LastSession, asplit, ColItems, ObjItem, strRegistry
-Dim Proxyenable, Result, AutoConfURL, ProxyServ, ProxyOver
+Const HKEY_LOCAL_MACHINE = &H80000002
+Dim strRegistry, Result
 
-Set objWMIService = GetObject("winmgmts:\\.\root\CIMV2")
 Set WShell = CreateObject("WScript.Shell")
-Set colOperatingSystems = objWMIService.ExecQuery ("Select * from Win32_OperatingSystem")
+Set objWMIService = GetObject("winmgmts:root\cimv2")
 
-For Each objOperatingSystem in colOperatingSystems
-	If InStr(objOperatingSystem.version,"5.1.")<>0 Or InStr(objOperatingSystem.version,"5.2.")<>0 Then 'OS is windows XP or 2003
-		IEVersion = WShell.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\Version")
-		LastSession = WShell.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AltDefaultUserName")
-	Else
-		IEVersion = WShell.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\svcVersion")
-		LastSession = WShell.RegRead("HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\LastLoggedOnUser")
-		asplit = split(LastSession, "\")
-		LastSession = asplit(1)
-	End If
-Next
+IEVersion = WShell.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\svcVersion")
+If err.number <> 0 Then
+	IEVersion = WShell.RegRead("HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Internet Explorer\Version")
+End If
+Err.Clear
+
+strRegistry = "Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\"
+
+Result = _
+	"<IESETTINGS>" & VbCrLf &_
+	"<VERSION>" & IEVersion & "</VERSION>" & VbCrLf
+
+LastSession = _
+	ReadRegStr (HKEY_LOCAL_MACHINE, strRegistry, "LastLoggedOnUser", 64)
+	asplit = split(LastSession, "\")
+	LastSession = asplit(1)
+
+Result = _
+	Result & "<LASTSESSION>" & LastSession & "</LASTSESSION>" & VbCrLf
 
 Set ColItems = objWMIService.ExecQuery("SELECT * FROM Win32_UserAccount where name='" & LastSession & "'",,48)
 For Each ObjItem in ColItems
@@ -45,18 +48,15 @@ For Each ObjItem in ColItems
 	Proxyenable = WShell.RegRead(strRegistry & "ProxyEnable")
 
 	If err.number = 0 Then
-		Result = "<IESETTINGS>" & VbCrLf
-		Result = Result & "<VERSION>" & IEVersion & "</VERSION>" & VbCrLf
-		Result = Result & "<LASTSESSION>" & LastSession & "</LASTSESSION>" & VbCrLf
-		Result = Result & "<SID>" & objItem.SID & "</SID>" & VbCrLf
-		Result = Result & "<PROXYENABLE>" & Proxyenable & "</PROXYENABLE>" & VbCrLf
+		Result = Result &	"<SID>" & objItem.SID & "</SID>" & VbCrLf &_
+							"<PROXYENABLE>" & Proxyenable & "</PROXYENABLE>" & VbCrLf
 		Err.Clear
 		
 		AutoConfURL = WShell.RegRead(strRegistry & "AutoConfigURL")
 		If err.number = 0 Then
 			Result = Result & "<AUTOCONFIGURL>" & AutoConfURL & "</AUTOCONFIGURL>" & VbCrLf
 		Else
-			Result = Result & "<AUTOCONFIGURL>Pas de script auto</AUTOCONFIGURL>" & VbCrLf
+			Result = Result & "<AUTOCONFIGURL>No auto script</AUTOCONFIGURL>" & VbCrLf
 		End If
 		Err.Clear
 		
@@ -64,20 +64,37 @@ For Each ObjItem in ColItems
 		If err.number = 0 Then
 			Result = Result & "<PROXYSERVER>" & ProxyServ & "</PROXYSERVER>" & VbCrLf
 		Else
-			Result = Result & "<PROXYSERVER>Pas de proxy</PROXYSERVER>" & VbCrLf
+			Result = Result & "<PROXYSERVER>No proxy</PROXYSERVER>" & VbCrLf
 		End If
 		Err.Clear
 		
 		ProxyOver = WShell.RegRead(strRegistry & "ProxyOverride")
-		ProxyOver = replace(ProxyOver,"<local>","")
 		If err.number = 0 Then
+			ProxyOver = replace(ProxyOver,"<local>","")
 			Result = Result & "<PROXYOVERRIDE>" & ProxyOver & "</PROXYOVERRIDE>" & VbCrLf
 		Else
-			Result = Result & "<PROXYOVERRIDE>Pas de param local</PROXYOVERRIDE>" & VbCrLf
+			Result = Result & "<PROXYOVERRIDE>No local param</PROXYOVERRIDE>" & VbCrLf
 		End If
-
-		Result = Result & "</IESETTINGS>" & VbCrLf
-		Wscript.echo Result
 	End If
 Next
-Err.Clear
+
+Function ReadRegStr (RootKey, Key, Value, RegType)
+	Dim oCtx, oLocator, oReg, oInParams, oOutParams
+
+	Set oCtx = CreateObject("WbemScripting.SWbemNamedValueSet")
+	oCtx.Add "__ProviderArchitecture", RegType
+
+	Set oLocator = CreateObject("Wbemscripting.SWbemLocator")
+	Set oReg = oLocator.ConnectServer("", "root\default", "", "", , , , oCtx).Get("StdRegProv")
+
+	Set oInParams = oReg.Methods_("GetStringValue").InParameters
+		oInParams.hDefKey = RootKey
+		oInParams.sSubKeyName = Key
+		oInParams.sValueName = Value
+
+	Set oOutParams = oReg.ExecMethod_("GetStringValue", oInParams, , oCtx)
+	ReadRegStr = oOutParams.sValue
+End Function
+
+Result = Result & "</IESETTINGS>"
+Wscript.Echo Result
