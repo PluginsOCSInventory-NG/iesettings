@@ -4,7 +4,7 @@
   "contributor" : [],
   "supportedAgent" : ["Windows"],
   "description" : {
-    "fr" : "Recupere la configuration du proxy dans IE",
-    "en" : "Retrieve internet explorer proxy settings"
+    "fr" : "Récupère la configuration du proxy dans Internet Explorer",
+    "en" : "Retrieve Internet Explorer proxy settings"
   }
 }
