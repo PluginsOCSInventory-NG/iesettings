@@ -1,39 +1,39 @@
 <?php
-function plugin_version_iesettings()
+
+/**
+ * This function is called on installation and is used to create database schema for the plugin
+ */
+function extension_install_iesettings()
 {
-return array('name' => 'Internet Explorer settings',
-'version' => '1.1',
-'author'=> 'Community, Frank BOURDEAU',
-'license' => 'GPLv2',
-'verMinOcs' => '2.2');
+    $commonObject = new ExtensionCommon;
+
+    $commonObject -> sqlQuery("CREATE TABLE IF NOT EXISTS `iesettings` (
+                              `ID` INT(11) NOT NULL AUTO_INCREMENT,
+                              `HARDWARE_ID` INT(11) NOT NULL,
+                              `VERSION` VARCHAR(255) DEFAULT NULL,
+                              `LASTSESSION` VARCHAR(255) DEFAULT NULL,
+                              `SID` VARCHAR(255) DEFAULT NULL,
+                              `PROXYENABLE` VARCHAR(255) DEFAULT NULL,
+                              `AUTOCONFIGURL` VARCHAR(255) DEFAULT NULL,
+                              `PROXYSERVER` VARCHAR(255) DEFAULT NULL,
+                              `PROXYOVERRIDE` VARCHAR(255) DEFAULT NULL,
+                              PRIMARY KEY  (`ID`,`HARDWARE_ID`)
+                              ) ENGINE=INNODB;");
 }
 
-function plugin_init_iesettings()
+/**
+ * This function is called on removal and is used to destroy database schema for the plugin
+ */
+function extension_delete_iesettings()
 {
-$object = new plugins;
-$object -> add_cd_entry("iesettings","other");
-
-$object -> sql_query("CREATE TABLE IF NOT EXISTS `iesettings` (
-  `ID` INT(11) NOT NULL AUTO_INCREMENT,
-  `HARDWARE_ID` INT(11) NOT NULL,
-  `VERSION` VARCHAR(255) DEFAULT NULL,
-  `LASTSESSION` VARCHAR(255) DEFAULT NULL,
-  `SID` VARCHAR(255) DEFAULT NULL,
-  `PROXYENABLE` VARCHAR(255) DEFAULT NULL,
-  `AUTOCONFIGURL` VARCHAR(255) DEFAULT NULL,
-  `PROXYSERVER` VARCHAR(255) DEFAULT NULL,
-  `PROXYOVERRIDE` VARCHAR(255) DEFAULT NULL,
-  PRIMARY KEY  (`ID`,`HARDWARE_ID`)
-) ENGINE=INNODB;");
-
+    $commonObject = new ExtensionCommon;
+    $commonObject -> sqlQuery("DROP TABLE `iesettings`;");
 }
 
-function plugin_delete_iesettings()
+/**
+ * This function is called on plugin upgrade
+ */
+function extension_upgrade_iesettings()
 {
-$object = new plugins;
-$object -> del_cd_entry("iesettings");
-$object -> sql_query("DROP TABLE `iesettings`;");
 
 }
-
-?>
